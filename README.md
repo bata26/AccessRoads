@@ -15,3 +15,13 @@ Creazione di un'interfaccia che integri il controllo di tutti (o alcuni) disposi
 - Promemoria di manutenzione: fornisce notifiche e promemoria per attività di manutenzione relative ai dispositivi domestici. --> Notifiche
 
 La comunizione tra il dispotivo android e i dispositivi domestici può essere tramite bluetooth/wifi.
+
+
+### Bluethoot NearBY Application
+Useful resources:
+- https://www.mdpi.com/1424-8220/21/16/5604
+- https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0193971
+- https://www.hindawi.com/journals/misy/2016/2083094/
+- https://www.researchgate.net/profile/Shashika-Lokuliyana/publication/298801565_Indoor_Positioning_Novel_Approach_for_Bluetooth_Networks_using_RSSI_Smoothing/links/57be9c2308aed246b0f74c20/Indoor-Positioning-Novel-Approach-for-Bluetooth-Networks-using-RSSI-Smoothing.pdf
+- https://www.researchgate.net/profile/Prakasam-Periasamy-2/publication/273897861_Accurate_Location_Identification_Using_Bluetooth_in_Android_Smartphone/links/5734036c08aea45ee838feb0/Accurate-Location-Identification-Using-Bluetooth-in-Android-Smartphone.pdf
+- https://ieeexplore.ieee.org/abstract/document/7951422
