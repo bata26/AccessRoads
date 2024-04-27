@@ -6,9 +6,9 @@ data class PointLists(
     var PointList: ArrayList<AccessibilityPoint> = arrayListOf()
 )
 
-data class AccessibilityPoint (
+data class AccessibilityPoint(
     var id: String = "",
-    var position: Position = Position(0.0,0.0),
+    var position: Position? = Position(0.0,0.0),
     var counter: Int = 0,
     var timestamp: Timestamp = Timestamp(0),
     var type: String = ""
