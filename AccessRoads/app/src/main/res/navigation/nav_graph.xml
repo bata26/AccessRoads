@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/MapFragment">
+
+    <fragment
+        android:id="@+id/MapFragment"
+        android:name="it.unipi.accessroads.MapFragment"
+        android:label="@string/map_fragment_label"
+        tools:layout="@layout/fragment_map">
+
+        <action
+            android:id="@+id/action_MapFragment_to_ReportFragment"
+            app:destination="@id/ReportFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/ReportFragment"
+        android:name="it.unipi.accessroads.ReportFragment"
+        android:label="@string/report_fragment_label"
+        tools:layout="@layout/fragment_report">
+
+        <action
+            android:id="@+id/action_ReportFragment_to_MapFragment"
+            app:destination="@id/MapFragment" />
+    </fragment>
+</navigation>
