@@ -6,5 +6,7 @@
     <string name="report_fragment_label">Report</string>
     <string name="report_placeholder">Report obstacle</string>
     <string name="report_btn">Report</string>
+    <string name="debug">Debug</string>
+    <string name="report">Report</string>
 
 </resources>
