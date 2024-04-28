@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_MapFragment_to_ReportFragment"
             app:destination="@id/ReportFragment" />
+        <action
+            android:id="@+id/action_MapFragment_to_DebugFragment"
+            app:destination="@id/DebugFragment" />
     </fragment>
     <fragment
         android:id="@+id/ReportFragment"
@@ -25,4 +28,9 @@
             android:id="@+id/action_ReportFragment_to_MapFragment"
             app:destination="@id/MapFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/DebugFragment"
+        android:name="it.unipi.accessroads.DebugFragment"
+        android:label="@string/debug_fragment_label"
+        tools:layout="@layout/fragment_debug"/>
 </navigation>
