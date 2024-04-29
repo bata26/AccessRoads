@@ -9,5 +9,7 @@
     <string name="debug">Debug</string>
     <string name="report">Report</string>
     <string name="debug_fragment_label">Debug</string>
+    <string name="debug_placeholder">Debug sensors stuff</string>
+
 
 </resources>

@@ -1,12 +1,15 @@
 package it.unipi.accessroads
 
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import it.unipi.accessroads.databinding.FragmentMapBinding
+
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -32,13 +35,17 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Event listener to navigate in ReportFragment
         binding.reportFragmentBtn.setOnClickListener {
             findNavController().navigate(R.id.action_MapFragment_to_ReportFragment)
         }
-
+        binding.debugPage.setOnClickListener {
+            findNavController().navigate(R.id.action_MapFragment_to_DebugFragment)
+        }
+        binding.sensorStartStop.setOnClickListener {
+            val context: Context? = getContext()
+            Toast.makeText(context, "Sensors", Toast.LENGTH_SHORT).show()
+        }
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
