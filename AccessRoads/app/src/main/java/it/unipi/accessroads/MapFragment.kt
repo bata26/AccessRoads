@@ -8,12 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLngBounds
-import it.unipi.accessroads.databinding.FragmentMapBinding
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MarkerOptions
+import it.unipi.accessroads.databinding.FragmentMapBinding
 
 
 /**
@@ -72,7 +72,9 @@ class MapFragment : Fragment() {
                 val position = LatLng(latitude, longitude)
                 bounds.include(position)
                 //accessPoints.forEach { bounds.include(it.latLng) }
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 20))
+                //googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 20))
+                val gpsPos = LatLng(43.720848, 10.389093)
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(gpsPos, 18f))
             }
         }
 
