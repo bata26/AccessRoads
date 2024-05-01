@@ -1,6 +1,9 @@
 package it.unipi.accessroads
 
+import Gps
 import android.content.Context
+import android.location.Location
+import android.location.LocationListener
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,16 +15,16 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.MarkerOptions
 import it.unipi.accessroads.databinding.FragmentMapBinding
 
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class MapFragment : Fragment() {
+class MapFragment : Fragment(), LocationListener {
 
     private var _binding: FragmentMapBinding? = null
+    private lateinit var gps: Gps
     /*
     private val accessPoints: List<AccessPoint> by lazy {
         PlacesReader(this).read()
@@ -43,6 +46,11 @@ class MapFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Inizializza e richiedi la posizione GPS
+        gps = Gps(this, this)
+        gps.getLocation()
         super.onViewCreated(view, savedInstanceState)
 
         binding.reportFragmentBtn.setOnClickListener {
@@ -67,14 +75,13 @@ class MapFragment : Fragment() {
             googleMap.setOnMapLoadedCallback {
                 // Ensure all places are visible in the map
                 val bounds = LatLngBounds.builder()
-                val latitude = 43.717 // Example latitude value
-                val longitude = 10.383 // Example longitude value
+                val latitude = gps.getLastKnownLocation()?.latitude ?: 43.717 // Usa una latitudine di default se la posizione non è disponibile
+                val longitude = gps.getLastKnownLocation()?.longitude ?: 10.383 // Usa una longitudine di default se la posizione non è disponibile
                 val position = LatLng(latitude, longitude)
                 bounds.include(position)
                 //accessPoints.forEach { bounds.include(it.latLng) }
                 //googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 20))
-                val gpsPos = LatLng(43.720848, 10.389093)
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(gpsPos, 18f))
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 18f))
             }
         }
 
@@ -83,18 +90,39 @@ class MapFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-/*
-    private fun addMarkers(googleMap: GoogleMap) {
-        accessPoints.forEach { point ->
-            val marker = googleMap.addMarker {
-                title(point.name)
-                position(point.latLng)
-                icon(point.icon)
+
+    override fun onLocationChanged(location: Location) {
+        val latitude = location.latitude
+        val longitude = location.longitude
+        val position = LatLng(latitude, longitude)
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync({
+            googleMap ->
+            googleMap.setOnMapLoadedCallback {
+                val bounds = LatLngBounds.builder()
+                val position = LatLng(latitude, longitude)
+                bounds.include(position)
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 18f))
             }
-            // Set place as the tag on the marker object so it can be referenced within
-            // MarkerInfoWindowAdapter
-            marker?.tag = point
-        }
+        })
     }
-    */
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // Gestisci i risultati della richiesta di permesso
+        gps.onRequestPermissionsResult(requestCode, grantResults)
+    }
+    /*
+        private fun addMarkers(googleMap: GoogleMap) {
+            accessPoints.forEach { point ->
+                val marker = googleMap.addMarker {
+                    title(point.name)
+                    position(point.latLng)
+                    icon(point.icon)
+                }
+                // Set place as the tag on the marker object so it can be referenced within
+                // MarkerInfoWindowAdapter
+                marker?.tag = point
+            }
+        }
+        */
 }
