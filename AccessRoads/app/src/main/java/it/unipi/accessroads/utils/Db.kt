@@ -1,0 +1,63 @@
+package it.unipi.accessroads
+
+import android.content.ContentValues.TAG
+import android.util.Log
+import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import it.unipi.accessroads.model.AccessibilityPoint
+import java.util.UUID
+
+class Db {
+    companion object {
+
+        fun getPoints(callback: (List<AccessibilityPoint>) -> Unit ) {
+            Log.d(TAG , "PRE READ")
+            val db = Firebase.firestore
+            val accessibilityPoints = mutableListOf<AccessibilityPoint>()
+            db.collection("points")
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        val data = document.data
+                        val geoPoint = document.getGeoPoint("position")
+                        val pos = geoPoint?.let { LatLng(geoPoint.latitude, geoPoint.longitude) }
+
+                        val accessibilityPoint = AccessibilityPoint(
+                            id = document.id,
+                            position = pos ?: LatLng(0.0, 0.0), // Default value if position is null
+                            counter = (data["counter"] as Long).toInt(),
+                            timestamp = data["timestamp"] as com.google.firebase.Timestamp,
+                            type = data["type"] as String
+                        )
+                        accessibilityPoints.add(accessibilityPoint)
+                    }
+                    callback(accessibilityPoints)
+                }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error getting documents: ", exception)
+                    callback(emptyList())
+                }
+        }
+
+        fun getUUID(): String {
+            return UUID.randomUUID().toString()
+        }
+
+        fun postPoint(accessibilityPoint: AccessibilityPoint) {
+            val db = Firebase.firestore
+            val point = HashMap<String, Any>()
+            point["_id"] = accessibilityPoint.id
+            point["position"] = GeoPoint(accessibilityPoint.position.latitude, accessibilityPoint.position.longitude)
+            point["counter"] = accessibilityPoint.counter
+            point["timestamp"] = accessibilityPoint.timestamp
+            point["type"] = accessibilityPoint.type
+            db.collection("points").document(accessibilityPoint.id)
+                .set(point)
+                .addOnSuccessListener { println("DocumentSnapshot successfully written!") }
+                .addOnFailureListener { e -> println("Error writing document: "+  e) }
+        }
+    }
+}
+
