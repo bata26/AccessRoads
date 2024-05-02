@@ -81,7 +81,7 @@ class MapFragment : Fragment(), LocationListener {
                 bounds.include(position)
                 //accessPoints.forEach { bounds.include(it.latLng) }
                 //googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 20))
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 18f))
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 2f))
             }
         }
 
@@ -102,7 +102,7 @@ class MapFragment : Fragment(), LocationListener {
                 val bounds = LatLngBounds.builder()
                 val position = LatLng(latitude, longitude)
                 bounds.include(position)
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 18f))
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 14f))
             }
         })
     }
