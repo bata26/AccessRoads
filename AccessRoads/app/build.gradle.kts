@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "it.unipi.accessroads"
-        minSdk = 19
+        minSdk = 21
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -65,6 +65,19 @@ dependencies {
 
     // Lifecycle Runtime KTX Library
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
+
+    // Compose
+    //implementation(libs.androidx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
 
 secrets {

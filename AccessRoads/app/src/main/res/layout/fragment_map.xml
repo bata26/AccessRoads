@@ -39,33 +39,5 @@
             app:srcCompat="@android:drawable/ic_dialog_alert"
             android:contentDescription="@string/report" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/sensor_start_stop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:contentDescription="@string/report"
-            app:layout_constraintBottom_toTopOf="@+id/report_fragment_btn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.97"
-            app:layout_constraintStart_toStartOf="@+id/map"
-            app:layout_constraintTop_toTopOf="@+id/map"
-            app:layout_constraintVertical_bias="0.97"
-            app:srcCompat="@android:drawable/ic_dialog_dialer" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/debug_page"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:contentDescription="@string/report"
-            app:layout_constraintBottom_toTopOf="@+id/sensor_start_stop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.97"
-            app:layout_constraintStart_toStartOf="@+id/map"
-            app:layout_constraintTop_toTopOf="@+id/map"
-            app:layout_constraintVertical_bias="0.97"
-            app:srcCompat="@android:drawable/ic_dialog_info" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

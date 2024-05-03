@@ -59,13 +59,6 @@ class MapFragment : Fragment(), LocationListener{
         binding.reportFragmentBtn.setOnClickListener {
             findNavController().navigate(R.id.action_MapFragment_to_ReportFragment)
         }
-        binding.debugPage.setOnClickListener {
-            findNavController().navigate(R.id.action_MapFragment_to_DebugFragment)
-        }
-        binding.sensorStartStop.setOnClickListener {
-            val context: Context? = getContext()
-            Toast.makeText(context, "Sensors", Toast.LENGTH_SHORT).show()
-        }
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
 
         mapFragment.getMapAsync { googleMap ->
