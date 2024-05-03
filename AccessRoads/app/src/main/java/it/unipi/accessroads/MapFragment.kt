@@ -23,7 +23,11 @@ import it.unipi.accessroads.databinding.FragmentMapBinding
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.maps.android.clustering.ClusterManager
 import it.unipi.accessroads.model.AccessibilityPoint
+import it.unipi.accessroads.utils.PointRenderer
+
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
@@ -62,9 +66,10 @@ class MapFragment : Fragment(), LocationListener{
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
 
         mapFragment.getMapAsync { googleMap ->
-            addMarkers(googleMap)
+            //addMarkers(googleMap)
+            addClusteredMarkers(googleMap)
             // Set custom info window adapter
-            googleMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
+            //googleMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
 
             googleMap.setOnMapLoadedCallback {
                 // Ensure all places are visible in the map
@@ -126,13 +131,23 @@ class MapFragment : Fragment(), LocationListener{
         Db.getPoints { accessibilityPoints ->
             for (point in accessibilityPoints) {
                 Log.d(TAG, "POINT : ${point}")
-                var icon : BitmapDescriptor
-                if(point.type == "elevator"){
-                    icon = elevatorIcon
-                }else if(point.type == "rough rode"){
-                    icon = roughRodeIcon
-                }else{
-                    icon = stairsIcon
+                val icon : BitmapDescriptor
+                when (point.type) {
+                    "elevator" -> {
+                        icon = elevatorIcon
+                    }
+
+                    "rough rode" -> {
+                        icon = roughRodeIcon
+                    }
+
+                    "stairs" -> {
+                        icon = stairsIcon
+                    }
+
+                    else -> {
+                        icon = BitmapDescriptorFactory.defaultMarker()
+                    }
                 }
                 val marker = googleMap.addMarker(
                     MarkerOptions()
@@ -146,7 +161,34 @@ class MapFragment : Fragment(), LocationListener{
             }
         }
     }
+
+    private fun addClusteredMarkers(googleMap: GoogleMap) {
+        // Create the ClusterManager class and set the custom renderer.
+        val clusterManager = ClusterManager<AccessibilityPoint>(requireContext(), googleMap)
+        clusterManager.renderer =
+            PointRenderer(
+                requireContext(),
+                googleMap,
+                clusterManager
+            )
+
+        // Set custom info window adapter
+        clusterManager.markerCollection.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
+        // Add the places to the ClusterManager.
+        Db.getPoints { accessibilityPoints -> clusterManager.addItems(accessibilityPoints)}
+        clusterManager.cluster()
+
+        // Set ClusterManager as the OnCameraIdleListener so that it
+        // can re-cluster when zooming in and out.
+        googleMap.setOnCameraIdleListener {
+            clusterManager.onCameraIdle()
+        }
+    }
 }
+
+/**
+ * Adds markers to the map with clustering support.
+ */
 
 
     //override fun onMapReady(googleMap: GoogleMap) {

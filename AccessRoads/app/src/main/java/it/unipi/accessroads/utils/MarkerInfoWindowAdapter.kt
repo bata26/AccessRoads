@@ -18,7 +18,7 @@ class MarkerInfoWindowAdapter(private val context: Context) : GoogleMap.InfoWind
         // 2. Inflate view and set title, address and rating
         val view = LayoutInflater.from(context).inflate(R.layout.marker_info_contents, null)
         view.findViewById<TextView>(R.id.text_view_type).text = point.type
-        view.findViewById<TextView>(R.id.text_view_position).text = "(${point.position.latitude} , ${point.position.longitude})"
+        view.findViewById<TextView>(R.id.text_view_position).text = "(${point.latLng.latitude} , ${point.latLng.longitude})"
         view.findViewById<TextView>(R.id.text_view_rating).text = "Reliability: ${getReliability(point.counter)}"
 
         return view

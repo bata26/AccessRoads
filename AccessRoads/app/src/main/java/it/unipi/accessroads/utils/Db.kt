@@ -26,7 +26,7 @@ class Db {
 
                         val accessibilityPoint = AccessibilityPoint(
                             id = document.id,
-                            position = pos ?: LatLng(0.0, 0.0), // Default value if position is null
+                            latLng = pos ?: LatLng(0.0, 0.0), // Default value if position is null
                             counter = (data["counter"] as Long).toInt(),
                             timestamp = data["timestamp"] as com.google.firebase.Timestamp,
                             type = data["type"] as String
