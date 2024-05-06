@@ -28,11 +28,46 @@ class SemanticDetector(private val context: Context) {
     private lateinit var accelerometerData: TimeSeries
     private lateinit var barometerData: TimeSeries
     private var detected = false
-    private var onPauseDeactivate = false
     private val ELEVATOR_BAR_CHANGE = 0.15f
     private val ELEVATOR_ACC_CHANGE = 0.08f
     private val ROUGH_ROAD_STDDEV = 0.4f
+    private val runnableDetector=object : Runnable {
+        override fun run() {
+            var semantic=""
+            val valuesBar = barometerData.getWindowToAnalize(WINDOW_SIZE, FilterType.LOW_PASS)
+            val valuesAcc = accelerometerData.getWindowToAnalize(WINDOW_SIZE, FilterType.LOW_PASS)
 
+            if (valuesBar[0] > 0 && abs(valuesBar[0] - valuesBar[WINDOW_SIZE - 1]) >= ELEVATOR_BAR_CHANGE && abs(valuesBar[0] - valuesBar[WINDOW_SIZE - 1]) < 5) {
+                val halfWindow = WINDOW_SIZE / 2
+                val firstHalfWindow = halfWindow - (halfWindow / 2)
+                val secondHalfWindow = halfWindow + (halfWindow / 2)
+
+                if (abs(valuesAcc[0] - valuesAcc[firstHalfWindow]) >= ELEVATOR_ACC_CHANGE || abs(valuesAcc[WINDOW_SIZE - 1] - valuesAcc[secondHalfWindow]) >= ELEVATOR_ACC_CHANGE) {
+                    Toast.makeText(context, "Elevator detected", Toast.LENGTH_SHORT).show()
+                    semantic="Elevator"
+                    detected = true
+                }
+            }
+
+            if (valuesBar[0] > 0 && abs(valuesBar[0] - valuesBar[WINDOW_SIZE - 1]) < ELEVATOR_BAR_CHANGE) {
+                if (calculateStandardDeviation(valuesAcc) >= ROUGH_ROAD_STDDEV) {
+                    Toast.makeText(context, "Rough Road Detected with std->"+calculateStandardDeviation(valuesAcc), Toast.LENGTH_SHORT).show()
+                    detected = true
+                    semantic="Rough Road"
+                }
+            }
+
+            if (detected) {
+                detected = false
+                handler.removeCallbacks(this)
+                handler.postDelayed(this, 8000L)
+                detectionListener?.onSemanticEventDetected(semantic)
+                Toast.makeText(context, "Sleep 8 secs", Toast.LENGTH_SHORT).show()
+            } else {
+                handler.postDelayed(this, 4000L)
+            }
+        }
+    }
     private val barometerListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
             val pressure = event.values[0]
@@ -58,45 +93,7 @@ class SemanticDetector(private val context: Context) {
         this.detectionListener = listener
     }
     private fun checkMovement() {
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                if (onPauseDeactivate) {
-                    return
-                }
-                var semantic=""
-                val valuesBar = barometerData.getWindowToAnalize(WINDOW_SIZE, FilterType.LOW_PASS)
-                val valuesAcc = accelerometerData.getWindowToAnalize(WINDOW_SIZE, FilterType.LOW_PASS)
-
-                if (valuesBar[0] > 0 && abs(valuesBar[0] - valuesBar[WINDOW_SIZE - 1]) >= ELEVATOR_BAR_CHANGE && abs(valuesBar[0] - valuesBar[WINDOW_SIZE - 1]) < 5) {
-                    val halfWindow = WINDOW_SIZE / 2
-                    val firstHalfWindow = halfWindow - (halfWindow / 2)
-                    val secondHalfWindow = halfWindow + (halfWindow / 2)
-
-                    if (abs(valuesAcc[0] - valuesAcc[firstHalfWindow]) >= ELEVATOR_ACC_CHANGE || abs(valuesAcc[WINDOW_SIZE - 1] - valuesAcc[secondHalfWindow]) >= ELEVATOR_ACC_CHANGE) {
-                        Toast.makeText(context, "Elevator detected", Toast.LENGTH_SHORT).show()
-                        semantic="Elevator"
-                        detected = true
-                    }
-                }
-
-                if (valuesBar[0] > 0 && abs(valuesBar[0] - valuesBar[WINDOW_SIZE - 1]) < ELEVATOR_BAR_CHANGE) {
-                    if (calculateStandardDeviation(valuesAcc) >= ROUGH_ROAD_STDDEV) {
-                        Toast.makeText(context, "Rough Road Detected with std->"+calculateStandardDeviation(valuesAcc), Toast.LENGTH_SHORT).show()
-                        detected = true
-                        semantic="Rough Road"
-                    }
-                }
-
-                if (detected) {
-                    detected = false
-                    handler.postDelayed(this, 8000L)
-                    detectionListener?.onSemanticEventDetected(semantic)
-                    Toast.makeText(context, "Sleep 8 secs", Toast.LENGTH_SHORT).show()
-                } else {
-                    handler.postDelayed(this, 4000L)
-                }
-            }
-        }, 4000L)
+        handler.post(runnableDetector)
     }
 
     private fun calculateStandardDeviation(values: FloatArray): Float {
@@ -121,15 +118,14 @@ class SemanticDetector(private val context: Context) {
         barometerData = TimeSeries(TIME_SERIES_SIZE)
 
         // Register sensor listeners
-        onPauseDeactivate=false
         sensorManager.registerListener(accelerometerListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
         sensorManager.registerListener(barometerListener, barometer, SensorManager.SENSOR_DELAY_NORMAL)
         checkMovement()
     }
 
     fun stopDetection() {
-        onPauseDeactivate = true
         sensorManager.unregisterListener(barometerListener)
         sensorManager.unregisterListener(accelerometerListener)
+        handler.removeCallbacks(runnableDetector)
     }
 }
