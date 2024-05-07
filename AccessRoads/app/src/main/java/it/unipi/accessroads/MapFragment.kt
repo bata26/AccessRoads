@@ -1,5 +1,4 @@
 package it.unipi.accessroads
-
 import it.unipi.accessroads.sensors.Gps
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
@@ -34,7 +33,7 @@ class MapFragment : Fragment(), LocationListener{
     private var _binding: FragmentMapBinding? = null
     private lateinit var gps: Gps
     private lateinit var points : List<AccessibilityPoint>
-    
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
