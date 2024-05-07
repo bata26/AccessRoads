@@ -15,7 +15,10 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 interface SemanticDetectionListener {
-    fun onSemanticEventDetected(semanticInfo: String)
+    fun onSemanticEventDetected(semanticInfo: SemanticType)
+}
+enum class SemanticType{
+    NONE,ELEVATOR,ROUGH_ROAD
 }
 class SemanticDetector(private val context: Context) {
     private lateinit var sensorManager: SensorManager
@@ -33,7 +36,7 @@ class SemanticDetector(private val context: Context) {
     private val ROUGH_ROAD_STDDEV = 0.8f
     private val runnableDetector=object : Runnable {
         override fun run() {
-            var semantic=""
+            var semantic:SemanticType=SemanticType.NONE
             val valuesBar = barometerData.getWindowToAnalize(WINDOW_SIZE, FilterType.LOW_PASS)
             val valuesAcc = accelerometerData.getWindowToAnalize(WINDOW_SIZE, FilterType.LOW_PASS)
 
@@ -44,7 +47,7 @@ class SemanticDetector(private val context: Context) {
 
                 if (abs(valuesAcc[0] - valuesAcc[firstHalfWindow]) >= ELEVATOR_ACC_CHANGE || abs(valuesAcc[WINDOW_SIZE - 1] - valuesAcc[secondHalfWindow]) >= ELEVATOR_ACC_CHANGE) {
                     Toast.makeText(context, "Elevator detected", Toast.LENGTH_SHORT).show()
-                    semantic="Elevator"
+                    semantic=SemanticType.ELEVATOR
                     detected = true
                 }
             }
@@ -53,7 +56,7 @@ class SemanticDetector(private val context: Context) {
                 if (calculateStandardDeviation(valuesAcc) >= ROUGH_ROAD_STDDEV) {
                     Toast.makeText(context, "Rough Road Detected with std->"+calculateStandardDeviation(valuesAcc), Toast.LENGTH_SHORT).show()
                     detected = true
-                    semantic="Rough Road"
+                    semantic=SemanticType.ROUGH_ROAD
                 }
             }
 

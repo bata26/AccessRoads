@@ -10,6 +10,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import it.unipi.accessroads.databinding.ActivityMainBinding
 import it.unipi.accessroads.sensors.SemanticDetectionListener
 import it.unipi.accessroads.sensors.SemanticDetector
+import it.unipi.accessroads.sensors.SemanticType
 
 
 class MainActivity : AppCompatActivity(), SemanticDetectionListener {
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
         semanticDetector.startDetection()
     }
 
-    override fun onSemanticEventDetected(semanticInfo: String) {
+    override fun onSemanticEventDetected(semanticInfo: SemanticType) {
         Toast.makeText(this, "now pos$semanticInfo",Toast.LENGTH_SHORT).show()
     }
 
