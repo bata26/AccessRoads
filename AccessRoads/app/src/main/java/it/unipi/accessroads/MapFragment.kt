@@ -1,9 +1,8 @@
 package it.unipi.accessroads
 
-import Gps
+import it.unipi.accessroads.sensors.Gps
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
-import android.content.Context
 import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import android.graphics.Color
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
