@@ -30,7 +30,7 @@ class SemanticDetector(private val context: Context) {
     private var detected = false
     private val ELEVATOR_BAR_CHANGE = 0.15f
     private val ELEVATOR_ACC_CHANGE = 0.08f
-    private val ROUGH_ROAD_STDDEV = 0.5f
+    private val ROUGH_ROAD_STDDEV = 0.8f
     private val runnableDetector=object : Runnable {
         override fun run() {
             var semantic=""
