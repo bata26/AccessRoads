@@ -3,7 +3,6 @@ package it.unipi.accessroads
 import GPSManager
 import LocationResultListener
 import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,8 +11,6 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import it.unipi.accessroads.databinding.ActivityMainBinding
 import it.unipi.accessroads.model.AccessibilityPoint
@@ -27,7 +24,6 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var semanticDetector: SemanticDetector
-    //private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var gpsManager: GPSManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +35,6 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
-        //fusedLocationProviderClient=LocationServices.getFusedLocationProviderClient(this)
         gpsManager=GPSManager(this)
         semanticDetector=SemanticDetector(this)
         semanticDetector.setSemanticDetectionListener(this)
@@ -49,8 +44,7 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
     //
     @SuppressLint("MissingPermission")
     override fun onSemanticEventDetected(semanticInfo: SemanticType) {
-
-        Toast.makeText(this, "now pos$semanticInfo",Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this, "now pos$semanticInfo",Toast.LENGTH_SHORT).show()
         gpsManager.getLastKnownLocation(object :LocationResultListener{
             override fun onLocationResult(location: MutableMap<String, Double>) {
                 val latitude=location["lat"]
@@ -63,27 +57,15 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
                 }
             }
         })
-        /*
-        fusedLocationProviderClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                if(location!=null){
-                    val latLng=LatLng(location.latitude,location.longitude)
-                    insertSemantic(latLng,semanticInfo)
-                }else{
-                    Log.d("error","location is null")
-                }
-            }
-
- */
     }
     private fun insertSemantic(latLng: LatLng,semanticInfo: SemanticType) {
         Log.d("handleLocationUpdate", "Received location update - lat: ${latLng.latitude}, long: ${latLng.longitude} semtic ${semanticInfo}")
-        var type = "elevator"
+        var type = "Elevator"
         if (semanticInfo == SemanticType.ROUGH_ROAD){
-            type = "rough rode"
+            type = "Rough Road"
         }
-        val point = AccessibilityPoint("", latLng, 1, type)
-        //Db.postPoint(point)
+        val point = AccessibilityPoint(Db.getUUID(), latLng, 1, type)
+        Db.postPoint(point)
     }
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
