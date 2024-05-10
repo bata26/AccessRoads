@@ -1,6 +1,7 @@
 package it.unipi.accessroads
 
 import android.content.ContentValues.TAG
+import android.location.Location
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.GeoPoint
@@ -8,9 +9,11 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import it.unipi.accessroads.model.AccessibilityPoint
 import java.util.UUID
+import kotlin.math.*
 
 class Db {
     companion object {
+        private val DIST_BETWEEN_2_POINTS_MAX:Double=150.0
 
         fun getPoints(callback: (List<AccessibilityPoint>) -> Unit ) {
             Log.d(TAG , "PRE READ")
@@ -46,15 +49,78 @@ class Db {
 
         fun postPoint(accessibilityPoint: AccessibilityPoint) {
             val db = Firebase.firestore
-            val point = HashMap<String, Any>()
-            point["_id"] = accessibilityPoint.id
-            point["position"] = GeoPoint(accessibilityPoint.position.latitude, accessibilityPoint.position.longitude)
-            point["counter"] = accessibilityPoint.counter
-            point["type"] = accessibilityPoint.type
-            db.collection("points").document(accessibilityPoint.id)
-                .set(point)
-                .addOnSuccessListener { println("DocumentSnapshot successfully written!") }
-                .addOnFailureListener { e -> println("Error writing document: "+  e) }
+
+            // Query points with the same semantic type
+            val query = db.collection("points")
+                .whereEqualTo("type", accessibilityPoint.type)
+
+            query.get().addOnSuccessListener { querySnapshot ->
+                val newPointLocation = LatLng(
+                    accessibilityPoint.position.latitude,
+                    accessibilityPoint.position.longitude
+                )
+                // Iterate through the query results
+                for (document in querySnapshot.documents) {
+                    val existingPoint = document.toObject(AccessibilityPoint::class.java)
+                    if (existingPoint != null) {
+                        Log.d("Query", "Document: ${existingPoint.position.latitude},${existingPoint.position.longitude}")
+                    }
+                    if (existingPoint != null) {
+                        val existingPointLocation = LatLng(
+                            existingPoint.position.latitude,
+                            existingPoint.position.longitude
+                        )
+
+                        // Calculate distance between new point and existing point
+                        val distance = calculateDistance(newPointLocation.latitude,newPointLocation.longitude, existingPointLocation.latitude,existingPointLocation.longitude)
+                        System.out.println(distance)
+                        if (distance <= DIST_BETWEEN_2_POINTS_MAX) {
+                            println("exist a point")
+                            val newCounter = existingPoint.counter + 1
+                            db.collection("points").document(document.id)
+                                .update("counter", newCounter)
+                                .addOnSuccessListener {
+                                    Log.d("Firebase Update", "Counter updated for existing point")
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("Firebase Update", "Error updating counter: $e")
+                                }
+                            return@addOnSuccessListener
+                        }
+                    }
+                }
+                /*
+                // If no existing point found within 200 meters, insert a new point
+                val point = hashMapOf(
+                    "_id" to accessibilityPoint.id,
+                    "position" to GeoPoint(accessibilityPoint.position.latitude, accessibilityPoint.position.longitude),
+                    "counter" to accessibilityPoint.counter,
+                    "type" to accessibilityPoint.type
+                )
+
+                db.collection("points").document(accessibilityPoint.id)
+                    .set(point)
+                    .addOnSuccessListener {
+                        Log.d("Firebase Insert", "New point inserted!")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Firebase Insert", "Error writing document: $e")
+                    }
+
+                 */
+            }.addOnFailureListener { e ->
+                Log.e("Firebase Query", "Error querying documents: $e")
+            }
+        }
+        private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+            val earthRadius = 6371 // Earth's radius in kilometers
+            val dLat = Math.toRadians(lat2 - lat1)
+            val dLon = Math.toRadians(lon2 - lon1)
+            val a = sin(dLat / 2) * sin(dLat / 2) +
+                    cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
+                    sin(dLon / 2) * sin(dLon / 2)
+            val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+            return earthRadius * c
         }
     }
 }
