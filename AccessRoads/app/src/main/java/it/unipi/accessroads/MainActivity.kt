@@ -1,5 +1,7 @@
 package it.unipi.accessroads
 
+import GPSManager
+import LocationResultListener
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
@@ -25,7 +27,8 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var semanticDetector: SemanticDetector
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    //private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var gpsManager: GPSManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -36,7 +39,8 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
-        fusedLocationProviderClient=LocationServices.getFusedLocationProviderClient(this)
+        //fusedLocationProviderClient=LocationServices.getFusedLocationProviderClient(this)
+        gpsManager=GPSManager(this)
         semanticDetector=SemanticDetector(this)
         semanticDetector.setSemanticDetectionListener(this)
         semanticDetector.startDetection()
@@ -47,26 +51,39 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
     override fun onSemanticEventDetected(semanticInfo: SemanticType) {
 
         Toast.makeText(this, "now pos$semanticInfo",Toast.LENGTH_SHORT).show()
+        gpsManager.getLastKnownLocation(object :LocationResultListener{
+            override fun onLocationResult(location: MutableMap<String, Double>) {
+                val latitude=location["lat"]
+                val longitude=location["long"]
+                if(latitude!=null&&longitude!=null){
+                    val latLng=LatLng(latitude, longitude)
+                    insertSemantic(latLng,semanticInfo)
+                }else{
+                    Log.d("error","Location is null")
+                }
+            }
+        })
+        /*
         fusedLocationProviderClient.lastLocation
             .addOnSuccessListener { location : Location? ->
                 if(location!=null){
                     val latLng=LatLng(location.latitude,location.longitude)
                     insertSemantic(latLng,semanticInfo)
                 }else{
+                    Log.d("error","location is null")
                 }
             }
+
+ */
     }
     private fun insertSemantic(latLng: LatLng,semanticInfo: SemanticType) {
-        // Use the latLng value as needed
-        // For example, you can update UI elements, perform calculations, or trigger other actions
-        // Example:
         Log.d("handleLocationUpdate", "Received location update - lat: ${latLng.latitude}, long: ${latLng.longitude} semtic ${semanticInfo}")
         var type = "elevator"
         if (semanticInfo == SemanticType.ROUGH_ROAD){
             type = "rough rode"
         }
-        val point = AccessibilityPoint("", latLng, 0, type)
-        Db.postPoint(point)
+        val point = AccessibilityPoint("", latLng, 1, type)
+        //Db.postPoint(point)
     }
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)

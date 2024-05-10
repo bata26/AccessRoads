@@ -28,7 +28,6 @@ class Db {
                             id = document.id,
                             latLng = pos ?: LatLng(0.0, 0.0), // Default value if position is null
                             counter = (data["counter"] as Long).toInt(),
-                            timestamp = data["timestamp"] as com.google.firebase.Timestamp,
                             type = data["type"] as String
                         )
                         accessibilityPoints.add(accessibilityPoint)
@@ -51,7 +50,6 @@ class Db {
             point["_id"] = accessibilityPoint.id
             point["position"] = GeoPoint(accessibilityPoint.position.latitude, accessibilityPoint.position.longitude)
             point["counter"] = accessibilityPoint.counter
-            point["timestamp"] = accessibilityPoint.timestamp
             point["type"] = accessibilityPoint.type
             db.collection("points").document(accessibilityPoint.id)
                 .set(point)
