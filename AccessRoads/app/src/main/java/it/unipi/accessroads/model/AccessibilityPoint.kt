@@ -8,7 +8,6 @@ data class AccessibilityPoint(
     var id: String = "",
     var latLng: LatLng = LatLng(0.0 , 0.0),
     var counter: Int = 0,
-    var timestamp: Timestamp = Timestamp(0,0),
     var type: String = ""
 ) : ClusterItem {
     override fun getPosition(): LatLng =

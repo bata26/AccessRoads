@@ -1,7 +1,9 @@
 package it.unipi.accessroads
-import it.unipi.accessroads.sensors.Gps
+import GPSManager
+import LocationResultListener
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
+import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
@@ -10,6 +12,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.graphics.Color
+import android.Manifest
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -31,8 +37,9 @@ import it.unipi.accessroads.utils.PointRenderer
 class MapFragment : Fragment(), LocationListener{
 
     private var _binding: FragmentMapBinding? = null
-    private lateinit var gps: Gps
+    private lateinit var gps: GPSManager
     private lateinit var points : List<AccessibilityPoint>
+    private val locationPermissionCode = 2
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -51,10 +58,9 @@ class MapFragment : Fragment(), LocationListener{
     @SuppressLint("PotentialBehaviorOverride")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        requestLocationPermission()
         // Inizializza e richiedi la posizione GPS
-        gps = Gps(this, this)
-        gps.getLocation()
+        gps = GPSManager(requireContext())
         super.onViewCreated(view, savedInstanceState)
 
         binding.reportFragmentBtn.setOnClickListener {
@@ -67,39 +73,53 @@ class MapFragment : Fragment(), LocationListener{
             addClusteredMarkers(googleMap)
             // Set custom info window adapter
             //googleMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
+            gps.getLastKnownLocation(object : LocationResultListener {
+                override fun onLocationResult(location: MutableMap<String, Double>) {
+                    val latitude = location["lat"]
+                    val longitude = location["long"]
+                    val position = LatLng(latitude ?: 43.717, longitude ?: 10.383)
+                    val bounds = LatLngBounds.builder().include(position).build()
 
-            googleMap.setOnMapLoadedCallback {
-                // Ensure all places are visible in the map
-                val bounds = LatLngBounds.builder()
-                val latitude = gps.getLastKnownLocation()?.latitude
-                    ?: 43.717
-                val longitude = gps.getLastKnownLocation()?.longitude
-                    ?: 10.383
-                val position = LatLng(latitude, longitude)
-                bounds.include(position)
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 2f))
-            }
+                    googleMap.setOnMapLoadedCallback {
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 14f))
+                        println("Latitude: $latitude, Longitude: $longitude")
+                    }
+                }
+            })
         }
 
     }
 
+    private fun requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                locationPermissionCode
+            )
+        }
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
     override fun onLocationChanged(location: Location) {
+        println("LOCATION CHANGED")
         val latitude = location.latitude
         val longitude = location.longitude
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync({ googleMap ->
-            googleMap.setOnMapLoadedCallback {
-                val bounds = LatLngBounds.builder()
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        mapFragment?.getMapAsync { googleMap ->
+            googleMap?.setOnMapLoadedCallback {
                 val position = LatLng(latitude, longitude)
-                bounds.include(position)
+                val bounds = LatLngBounds.builder().include(position).build()
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 14f))
             }
-        })
+        }
     }
 
     private val elevatorIcon: BitmapDescriptor by lazy {
@@ -119,10 +139,15 @@ class MapFragment : Fragment(), LocationListener{
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        println("RICHIEDENDO i permessi")
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // Gestisci i risultati della richiesta di permesso
-        gps.onRequestPermissionsResult(requestCode, grantResults)
+        if (requestCode == locationPermissionCode) {
+            if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
+
 
     private fun addMarkers(googleMap: GoogleMap) {
         Db.getPoints { accessibilityPoints ->

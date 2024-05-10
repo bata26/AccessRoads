@@ -14,6 +14,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import it.unipi.accessroads.databinding.ActivityMainBinding
+import it.unipi.accessroads.model.AccessibilityPoint
 import it.unipi.accessroads.sensors.SemanticDetectionListener
 import it.unipi.accessroads.sensors.SemanticDetector
 import it.unipi.accessroads.sensors.SemanticType
@@ -41,8 +42,10 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
         semanticDetector.startDetection()
     }
 
+    //
     @SuppressLint("MissingPermission")
     override fun onSemanticEventDetected(semanticInfo: SemanticType) {
+
         Toast.makeText(this, "now pos$semanticInfo",Toast.LENGTH_SHORT).show()
         fusedLocationProviderClient.lastLocation
             .addOnSuccessListener { location : Location? ->
@@ -58,6 +61,12 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
         // For example, you can update UI elements, perform calculations, or trigger other actions
         // Example:
         Log.d("handleLocationUpdate", "Received location update - lat: ${latLng.latitude}, long: ${latLng.longitude} semtic ${semanticInfo}")
+        var type = "elevator"
+        if (semanticInfo == SemanticType.ROUGH_ROAD){
+            type = "rough rode"
+        }
+        val point = AccessibilityPoint("", latLng, 0, type)
+        Db.postPoint(point)
     }
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
