@@ -155,15 +155,15 @@ class MapFragment : Fragment(), LocationListener{
                 Log.d(TAG, "POINT : ${point}")
                 val icon : BitmapDescriptor
                 when (point.type) {
-                    "elevator" -> {
+                    "Elevator" -> {
                         icon = elevatorIcon
                     }
 
-                    "rough rode" -> {
+                    "Rough Road" -> {
                         icon = roughRodeIcon
                     }
 
-                    "stairs" -> {
+                    "Stairs" -> {
                         icon = stairsIcon
                     }
 
