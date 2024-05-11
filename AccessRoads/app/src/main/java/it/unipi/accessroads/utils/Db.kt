@@ -55,45 +55,42 @@ class Db {
                 .whereEqualTo("type", accessibilityPoint.type)
 
             query.get().addOnSuccessListener { querySnapshot ->
-                val newPointLocation = LatLng(
-                    accessibilityPoint.position.latitude,
-                    accessibilityPoint.position.longitude
-                )
+                val newPointLocation = accessibilityPoint.latLng
                 // Iterate through the query results
-                for (document in querySnapshot.documents) {
-                    val existingPoint = document.toObject(AccessibilityPoint::class.java)
-                    if (existingPoint != null) {
-                        Log.d("Query", "Document: ${existingPoint.position.latitude},${existingPoint.position.longitude}")
-                    }
-                    if (existingPoint != null) {
-                        val existingPointLocation = LatLng(
-                            existingPoint.position.latitude,
-                            existingPoint.position.longitude
-                        )
+                for (document in querySnapshot) {
+                    val data = document.data
+                    val geoPoint = document.getGeoPoint("position")
+                    val pos = geoPoint?.let { LatLng(geoPoint.latitude, geoPoint.longitude) }
 
-                        // Calculate distance between new point and existing point
-                        val distance = calculateDistance(newPointLocation.latitude,newPointLocation.longitude, existingPointLocation.latitude,existingPointLocation.longitude)
-                        System.out.println(distance)
-                        if (distance <= DIST_BETWEEN_2_POINTS_MAX) {
-                            println("exist a point")
-                            val newCounter = existingPoint.counter + 1
-                            db.collection("points").document(document.id)
-                                .update("counter", newCounter)
-                                .addOnSuccessListener {
-                                    Log.d("Firebase Update", "Counter updated for existing point")
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("Firebase Update", "Error updating counter: $e")
-                                }
-                            return@addOnSuccessListener
-                        }
+                    val accessibilityPointTest = AccessibilityPoint(
+                        id = document.id,
+                        latLng = pos ?: LatLng(0.0, 0.0), // Default value if position is null
+                        counter = (data["counter"] as Long).toInt(),
+                        type = data["type"] as String
+                    )
+                    Log.d("Query", "Document: ${accessibilityPointTest.latLng.latitude},${accessibilityPointTest.latLng.longitude}")
+                    val existingPointLocation = accessibilityPointTest.latLng
+
+                    // Calculate distance between new point and existing point
+                    val distance = calculateDistance(newPointLocation.latitude,newPointLocation.longitude, existingPointLocation.latitude,existingPointLocation.longitude)
+                    System.out.println(distance)
+                    if (distance <= DIST_BETWEEN_2_POINTS_MAX) {
+                        val newCounter = accessibilityPointTest.counter + 1
+                        db.collection("points").document(document.id)
+                            .update("counter", newCounter)
+                            .addOnSuccessListener {
+                                Log.d("Firebase Update", "Counter updated for existing point")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("Firebase Update", "Error updating counter: $e")
+                            }
+                        return@addOnSuccessListener
                     }
                 }
-                /*
-                // If no existing point found within 200 meters, insert a new point
+
                 val point = hashMapOf(
                     "_id" to accessibilityPoint.id,
-                    "position" to GeoPoint(accessibilityPoint.position.latitude, accessibilityPoint.position.longitude),
+                    "position" to GeoPoint(accessibilityPoint.latLng.latitude, accessibilityPoint.latLng.longitude),
                     "counter" to accessibilityPoint.counter,
                     "type" to accessibilityPoint.type
                 )
@@ -106,8 +103,6 @@ class Db {
                     .addOnFailureListener { e ->
                         Log.e("Firebase Insert", "Error writing document: $e")
                     }
-
-                 */
             }.addOnFailureListener { e ->
                 Log.e("Firebase Query", "Error querying documents: $e")
             }
