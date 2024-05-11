@@ -115,7 +115,7 @@ class MapFragment : Fragment(), LocationListener{
         mapFragment?.getMapAsync { googleMap ->
             googleMap?.setOnMapLoadedCallback {
                 val position = LatLng(latitude, longitude)
-                val bounds = LatLngBounds.builder().include(position).build()
+                LatLngBounds.builder().include(position).build()
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 14f))
             }
         }
@@ -147,41 +147,6 @@ class MapFragment : Fragment(), LocationListener{
         }
     }
 
-
-    private fun addMarkers(googleMap: GoogleMap) {
-        Db.getPoints { accessibilityPoints ->
-            for (point in accessibilityPoints) {
-                Log.d(TAG, "POINT : ${point}")
-                val icon : BitmapDescriptor
-                when (point.type) {
-                    "Elevator" -> {
-                        icon = elevatorIcon
-                    }
-
-                    "Rough Road" -> {
-                        icon = roughRodeIcon
-                    }
-
-                    "Stairs" -> {
-                        icon = stairsIcon
-                    }
-
-                    else -> {
-                        icon = BitmapDescriptorFactory.defaultMarker()
-                    }
-                }
-                val marker = googleMap.addMarker(
-                    MarkerOptions()
-                        .position(point.position)
-                        .title(point.type)
-                        .icon(icon)
-                )
-                // Set place as the tag on the marker object so it can be referenced within
-                // MarkerInfoWindowAdapter
-                marker?.tag = point
-            }
-        }
-    }
 
     private fun addClusteredMarkers(googleMap: GoogleMap) {
         // Create the ClusterManager class and set the custom renderer.

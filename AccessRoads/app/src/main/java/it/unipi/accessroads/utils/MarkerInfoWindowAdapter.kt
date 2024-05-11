@@ -25,11 +25,11 @@ class MarkerInfoWindowAdapter(private val context: Context) : GoogleMap.InfoWind
     }
     private fun getReliability(counter: Int): String {
         if(counter <= 7)
-            return "low"
+            return "Low"
         else if (counter in 8..10)
-            return "medium"
+            return "Medium"
         else
-            return "high"
+            return "High"
     }
 
     override fun getInfoWindow(marker: Marker): View? {
@@ -37,3 +37,5 @@ class MarkerInfoWindowAdapter(private val context: Context) : GoogleMap.InfoWind
         return null
     }
 }
+
+

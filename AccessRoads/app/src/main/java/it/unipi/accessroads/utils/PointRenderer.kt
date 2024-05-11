@@ -45,13 +45,13 @@ class PointRenderer(
     override fun onBeforeClusterItemRendered(item: AccessibilityPoint, markerOptions: MarkerOptions) {
         val icon : BitmapDescriptor
         when (item.type) {
-            "elevator" -> {
+            "Elevator" -> {
                 icon = elevatorIcon
             }
-            "rough rode" -> {
+            "Rough Road" -> {
                 icon = roughRodeIcon
             }
-            "stairs" -> {
+            "Stairs" -> {
                 icon = stairsIcon
             }
             else -> {
