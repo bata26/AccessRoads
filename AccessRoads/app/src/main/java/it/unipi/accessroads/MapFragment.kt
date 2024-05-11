@@ -138,7 +138,6 @@ class MapFragment : Fragment(), LocationListener{
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        println("RICHIEDENDO i permessi")
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == locationPermissionCode) {
             if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
