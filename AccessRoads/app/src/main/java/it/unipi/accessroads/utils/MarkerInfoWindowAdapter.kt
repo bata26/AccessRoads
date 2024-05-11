@@ -18,18 +18,16 @@ class MarkerInfoWindowAdapter(private val context: Context) : GoogleMap.InfoWind
         // 2. Inflate view and set title, address and rating
         val view = LayoutInflater.from(context).inflate(R.layout.marker_info_contents, null)
         view.findViewById<TextView>(R.id.text_view_type).text = point.type
-        view.findViewById<TextView>(R.id.text_view_position).text = "(${point.latLng.latitude} , ${point.latLng.longitude})"
         view.findViewById<TextView>(R.id.text_view_rating).text = "Reliability: ${getReliability(point.counter)}"
 
         return view
     }
     private fun getReliability(counter: Int): String {
-        if(counter <= 7)
-            return "low"
-        else if (counter in 8..10)
-            return "medium"
-        else
-            return "high"
+        when {
+            counter <= 7 -> return "Low"
+            counter in 8..10 -> return "Medium"
+            else -> return "High"
+        }
     }
 
     override fun getInfoWindow(marker: Marker): View? {
@@ -37,3 +35,5 @@ class MarkerInfoWindowAdapter(private val context: Context) : GoogleMap.InfoWind
         return null
     }
 }
+
+
