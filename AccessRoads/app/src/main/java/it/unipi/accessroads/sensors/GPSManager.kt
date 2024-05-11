@@ -1,4 +1,4 @@
-
+package it.unipi.accessroads.sensors
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager

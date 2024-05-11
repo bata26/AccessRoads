@@ -1,7 +1,6 @@
 package it.unipi.accessroads
 
-import GPSManager
-import LocationResultListener
+import it.unipi.accessroads.sensors.*
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
