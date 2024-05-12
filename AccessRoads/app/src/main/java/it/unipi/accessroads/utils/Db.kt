@@ -1,7 +1,6 @@
-package it.unipi.accessroads
+package it.unipi.accessroads.utils
 
 import android.content.ContentValues.TAG
-import android.location.Location
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.GeoPoint
@@ -13,7 +12,7 @@ import kotlin.math.*
 
 class Db {
     companion object {
-        private val DIST_BETWEEN_2_POINTS_MAX:Double=150.0
+        private const val DIST_BETWEEN_2_POINTS_MAX:Double=150.0
 
         fun getPoints(callback: (List<AccessibilityPoint>) -> Unit ) {
             Log.d(TAG , "PRE READ")
@@ -73,7 +72,7 @@ class Db {
 
                     // Calculate distance between new point and existing point
                     val distance = calculateDistance(newPointLocation.latitude,newPointLocation.longitude, existingPointLocation.latitude,existingPointLocation.longitude)
-                    System.out.println(distance)
+                    println(distance)
                     if (distance <= DIST_BETWEEN_2_POINTS_MAX) {
                         val newCounter = accessibilityPointTest.counter + 1
                         db.collection("points").document(document.id)

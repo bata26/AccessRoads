@@ -1,4 +1,4 @@
-package it.unipi.accessroads
+package it.unipi.accessroads.utils
 
 import android.content.Context
 import android.graphics.Bitmap

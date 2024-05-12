@@ -1,7 +1,6 @@
 package it.unipi.accessroads.model
 
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.Timestamp
 import com.google.maps.android.clustering.ClusterItem
 
 data class AccessibilityPoint(

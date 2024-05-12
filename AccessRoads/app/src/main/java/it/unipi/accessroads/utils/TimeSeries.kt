@@ -3,8 +3,8 @@ package it.unipi.accessroads.utils
 enum class FilterType {
     NONE, LOW_PASS
 }
-class TimeSeries(val size:Int) {
-    private val FILTER_WINDOW=3//must be dispari
+class TimeSeries(private val size:Int) {
+    private val FILTER_WINDOW=3 // Must be odd
     private val data = FloatArray(size)
     private var currentIndex = 0
 
@@ -13,7 +13,7 @@ class TimeSeries(val size:Int) {
         currentIndex = (currentIndex + 1) % size
     }
 
-    fun getWindowToAnalize(windowSize: Int,filter:FilterType=FilterType.NONE): FloatArray {
+    fun getWindowToAnalyze(windowSize: Int, filter:FilterType=FilterType.NONE): FloatArray {
         when(filter){
             FilterType.NONE->{val recentData = FloatArray(windowSize)
                 for (i in 0 until windowSize) {

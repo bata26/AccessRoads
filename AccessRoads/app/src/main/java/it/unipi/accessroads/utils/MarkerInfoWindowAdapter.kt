@@ -1,4 +1,4 @@
-package it.unipi.accessroads
+package it.unipi.accessroads.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,10 +7,11 @@ import android.view.View
 import android.widget.TextView
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
+import it.unipi.accessroads.R
 import it.unipi.accessroads.model.AccessibilityPoint
 
 class MarkerInfoWindowAdapter(private val context: Context) : GoogleMap.InfoWindowAdapter {
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "InflateParams")
     override fun getInfoContents(marker: Marker): View? {
         // 1. Get tag
         val point = marker.tag as? AccessibilityPoint ?: return null
@@ -23,10 +24,10 @@ class MarkerInfoWindowAdapter(private val context: Context) : GoogleMap.InfoWind
         return view
     }
     private fun getReliability(counter: Int): String {
-        when {
-            counter <= 7 -> return "Low"
-            counter in 8..10 -> return "Medium"
-            else -> return "High"
+        return when {
+            counter <= 7 -> "Low"
+            counter in 8..10 -> "Medium"
+            else -> "High"
         }
     }
 

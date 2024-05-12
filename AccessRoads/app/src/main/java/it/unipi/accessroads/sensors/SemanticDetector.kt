@@ -7,7 +7,6 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import it.unipi.accessroads.utils.FilterType
 import it.unipi.accessroads.utils.TimeSeries
@@ -37,8 +36,8 @@ class SemanticDetector(private val context: Context) {
     private val runnableDetector=object : Runnable {
         override fun run() {
             var semantic:SemanticType=SemanticType.NONE
-            val valuesBar = barometerData.getWindowToAnalize(WINDOW_SIZE, FilterType.LOW_PASS)
-            val valuesAcc = accelerometerData.getWindowToAnalize(WINDOW_SIZE, FilterType.LOW_PASS)
+            val valuesBar = barometerData.getWindowToAnalyze(WINDOW_SIZE, FilterType.LOW_PASS)
+            val valuesAcc = accelerometerData.getWindowToAnalyze(WINDOW_SIZE, FilterType.LOW_PASS)
 
             if (valuesBar[0] > 0 && abs(valuesBar[0] - valuesBar[WINDOW_SIZE - 1]) >= ELEVATOR_BAR_CHANGE && abs(valuesBar[0] - valuesBar[WINDOW_SIZE - 1]) < 5) {
                 val halfWindow = WINDOW_SIZE / 2

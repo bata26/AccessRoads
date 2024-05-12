@@ -4,7 +4,6 @@ import it.unipi.accessroads.sensors.*
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -16,6 +15,7 @@ import it.unipi.accessroads.model.AccessibilityPoint
 import it.unipi.accessroads.sensors.SemanticDetectionListener
 import it.unipi.accessroads.sensors.SemanticDetector
 import it.unipi.accessroads.sensors.SemanticType
+import it.unipi.accessroads.utils.Db
 
 
 class MainActivity : AppCompatActivity(), SemanticDetectionListener {
@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
     //
     @SuppressLint("MissingPermission")
     override fun onSemanticEventDetected(semanticInfo: SemanticType) {
-        //Toast.makeText(this, "now pos$semanticInfo",Toast.LENGTH_SHORT).show()
         gpsManager.getLastKnownLocation(object :LocationResultListener{
             override fun onLocationResult(location: MutableMap<String, Double>) {
                 val latitude=location["lat"]
@@ -58,7 +57,7 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
         })
     }
     private fun insertSemantic(latLng: LatLng,semanticInfo: SemanticType) {
-        Log.d("handleLocationUpdate", "Received location update - lat: ${latLng.latitude}, long: ${latLng.longitude} semtic ${semanticInfo}")
+        Log.d("handleLocationUpdate", "Received location update - lat: ${latLng.latitude}, long: ${latLng.longitude} semantic $semanticInfo")
         var type = "Elevator"
         if (semanticInfo == SemanticType.ROUGH_ROAD){
             type = "Rough Road"

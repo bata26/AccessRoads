@@ -9,7 +9,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
-import it.unipi.accessroads.BitmapHelper
 import it.unipi.accessroads.R
 import it.unipi.accessroads.model.AccessibilityPoint
 
@@ -43,19 +42,21 @@ class PointRenderer(
      * options should be set
      */
     override fun onBeforeClusterItemRendered(item: AccessibilityPoint, markerOptions: MarkerOptions) {
-        val icon : BitmapDescriptor
-        when (item.type) {
+        val icon : BitmapDescriptor = when (item.type) {
             "Elevator" -> {
-                icon = elevatorIcon
+                elevatorIcon
             }
+
             "Rough Road" -> {
-                icon = roughRodeIcon
+                roughRodeIcon
             }
+
             "Stairs" -> {
-                icon = stairsIcon
+                stairsIcon
             }
+
             else -> {
-                icon = BitmapDescriptorFactory.defaultMarker()
+                BitmapDescriptorFactory.defaultMarker()
             }
         }
 

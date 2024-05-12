@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 import it.unipi.accessroads.databinding.FragmentReportBinding
 import it.unipi.accessroads.model.AccessibilityPoint
 import it.unipi.accessroads.sensors.*
+import it.unipi.accessroads.utils.Db
 import it.unipi.accessroads.R as K
 
 
