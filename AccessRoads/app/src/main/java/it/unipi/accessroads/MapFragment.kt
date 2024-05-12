@@ -70,6 +70,7 @@ class MapFragment : Fragment(), LocationListener{
                     val latitude = location["lat"]
                     val longitude = location["long"]
                     val position = LatLng(latitude ?: 43.717, longitude ?: 10.383)
+                    LatLngBounds.builder().include(position).build()
                     googleMap.setOnMapLoadedCallback {
                         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 14f))
                         println("Latitude: $latitude, Longitude: $longitude")

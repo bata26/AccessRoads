@@ -81,6 +81,7 @@ class ReportFragment : Fragment() {
         })
     }
     private fun send(latLng: LatLng, type : String){
+        Log.d("sendPointRep","${latLng.latitude},${latLng.longitude}")
         val accessibilityPoint= AccessibilityPoint(Db.getUUID(),latLng,1,type)
         Db.postPoint(accessibilityPoint)
     }

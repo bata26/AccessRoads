@@ -12,7 +12,7 @@ import kotlin.math.*
 
 class Db {
     companion object {
-        private const val DIST_BETWEEN_2_POINTS_MAX:Double=150.0
+        private const val DIST_BETWEEN_2_POINTS_MAX:Double=0.15
 
         fun getPoints(callback: (List<AccessibilityPoint>) -> Unit ) {
             Log.d(TAG , "PRE READ")
@@ -25,7 +25,7 @@ class Db {
                         val data = document.data
                         val geoPoint = document.getGeoPoint("position")
                         val pos = geoPoint?.let { LatLng(geoPoint.latitude, geoPoint.longitude) }
-
+                        Log.d("puntipos","${geoPoint?.latitude},${geoPoint?.longitude},${data["type"]},${data["counter"]}")
                         val accessibilityPoint = AccessibilityPoint(
                             id = document.id,
                             latLng = pos ?: LatLng(0.0, 0.0), // Default value if position is null
