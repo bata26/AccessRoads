@@ -30,8 +30,8 @@ class SemanticDetector(private val context: Context) {
     private lateinit var accelerometerData: TimeSeries
     private lateinit var barometerData: TimeSeries
     private var detected = false
-    private val ELEVATOR_BAR_CHANGE = 0.15f
-    private val ELEVATOR_ACC_CHANGE = 0.08f
+    private val ELEVATOR_BAR_CHANGE = 0.20f
+    private val ELEVATOR_ACC_CHANGE = 0.12f
     private val ROUGH_ROAD_STDDEV = 1.5f
     private val runnableDetector=object : Runnable {
         override fun run() {
