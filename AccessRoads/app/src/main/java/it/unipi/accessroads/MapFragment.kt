@@ -1,14 +1,14 @@
 package it.unipi.accessroads
-import it.unipi.accessroads.sensors.*
+
+import it.unipi.accessroads.sensors.GPSManager
+import it.unipi.accessroads.sensors.LocationResultListener
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.Manifest
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -26,59 +26,42 @@ import it.unipi.accessroads.utils.Db
 import it.unipi.accessroads.utils.MarkerInfoWindowAdapter
 import it.unipi.accessroads.utils.PointRenderer
 
-/**
- * A simple [Fragment] subclass as the default destination in the navigation.
- */
-class MapFragment : Fragment(), LocationListener{
+class MapFragment : Fragment(), LocationResultListener {
 
     private var _binding: FragmentMapBinding? = null
     private lateinit var gps: GPSManager
     private val locationPermissionCode = 2
+    private var googleMap: GoogleMap? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     @SuppressLint("PotentialBehaviorOverride")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requestLocationPermission()
-        // Initialize and request GPS location
+
+
         gps = GPSManager(requireContext())
-        super.onViewCreated(view, savedInstanceState)
+        requestLocationPermission()
 
         binding.reportFragmentBtn.setOnClickListener {
             findNavController().navigate(R.id.action_MapFragment_to_ReportFragment)
         }
+
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-
-        mapFragment.getMapAsync { googleMap ->
-            addClusteredMarkers(googleMap)
-            // Set custom info window adapter
-            gps.getLastKnownLocation(object : LocationResultListener {
-                override fun onLocationResult(location: MutableMap<String, Double>) {
-                    val latitude = location["lat"]
-                    val longitude = location["long"]
-                    val position = LatLng(latitude ?: 43.717, longitude ?: 10.383)
-                    LatLngBounds.builder().include(position).build()
-                    googleMap.setOnMapLoadedCallback {
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 14f))
-                        println("Latitude: $latitude, Longitude: $longitude")
-                    }
-                }
-            })
+        mapFragment.getMapAsync { map ->
+            googleMap = map
+            addClusteredMarkers(map)
+            gps.startLocationUpdates()
+            updateCameraToLastKnownLocation()
         }
-
     }
 
     private fun requestLocationPermission() {
@@ -92,25 +75,28 @@ class MapFragment : Fragment(), LocationListener{
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 locationPermissionCode
             )
+        } else {
+            gps.startLocationUpdates()
         }
     }
+
+    private fun updateCameraToLastKnownLocation() {
+        gps.getLastKnownLocation(object : LocationResultListener {
+            override fun onLocationResult(location: MutableMap<String, Double>) {
+                val latitude = location["lat"]
+                val longitude = location["long"]
+                if (latitude != null && longitude != null) {
+                    val position = LatLng(latitude, longitude)
+                    googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 18f))
+                }
+            }
+        })
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onLocationChanged(location: Location) {
-        println("LOCATION CHANGED")
-        val latitude = location.latitude
-        val longitude = location.longitude
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-        mapFragment?.getMapAsync { googleMap ->
-            googleMap.setOnMapLoadedCallback {
-                val position = LatLng(latitude, longitude)
-                LatLngBounds.builder().include(position).build()
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 14f))
-            }
-        }
+        gps.stopLocationUpdates()
     }
 
     @Deprecated("Deprecated in Java")
@@ -121,32 +107,33 @@ class MapFragment : Fragment(), LocationListener{
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == locationPermissionCode) {
-            if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                gps.startLocationUpdates()
+                updateCameraToLastKnownLocation()
+            } else {
                 Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun addClusteredMarkers(googleMap: GoogleMap) {
-        // Create the ClusterManager class and set the custom renderer.
-        val clusterManager = ClusterManager<AccessibilityPoint>(requireContext(), googleMap)
-        clusterManager.renderer =
-            PointRenderer(
-                requireContext(),
-                googleMap,
-                clusterManager
-            )
-
-        // Set custom info window adapter
-        clusterManager.markerCollection.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
-        // Add the places to the ClusterManager.
-        Db.getPoints { accessibilityPoints -> clusterManager.addItems(accessibilityPoints)}
-        clusterManager.cluster()
-
-        // Set ClusterManager as the OnCameraIdleListener so that it
-        // can re-cluster when zooming in and out.
-        googleMap.setOnCameraIdleListener {
-            clusterManager.onCameraIdle()
+    override fun onLocationResult(location: MutableMap<String, Double>) {
+        val latitude = location["lat"]
+        val longitude = location["long"]
+        if (latitude != null && longitude != null) {
+            val position = LatLng(latitude, longitude)
+            googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 18f))
         }
+    }
+
+    private fun addClusteredMarkers(map: GoogleMap) {
+        val clusterManager = ClusterManager<AccessibilityPoint>(requireContext(), map)
+        clusterManager.renderer = PointRenderer(requireContext(), map, clusterManager)
+        clusterManager.markerCollection.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
+
+        Db.getPoints { accessibilityPoints -> clusterManager.addItems(accessibilityPoints)
+            clusterManager.cluster()}
+
+
+        map.setOnCameraIdleListener { clusterManager.onCameraIdle() }
     }
 }

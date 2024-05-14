@@ -42,6 +42,7 @@ class ReportFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         gpsManager = GPSManager(requireContext())
+        gpsManager.startLocationUpdates()
         val spinner: Spinner = binding.reportSpinner
         // Create an ArrayAdapter using the string array and a default spinner layout.
         ArrayAdapter.createFromResource(
@@ -64,6 +65,7 @@ class ReportFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        gpsManager.stopLocationUpdates()
         _binding = null
     }
     private fun sendReport(type : String){

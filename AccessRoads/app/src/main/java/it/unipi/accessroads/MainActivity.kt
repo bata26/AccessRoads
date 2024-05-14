@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
         gpsManager=GPSManager(this)
+        gpsManager.startLocationUpdates()
         semanticDetector=SemanticDetector(this)
         semanticDetector.setSemanticDetectionListener(this)
         semanticDetector.startDetection()
@@ -73,18 +74,22 @@ class MainActivity : AppCompatActivity(), SemanticDetectionListener {
     override fun onResume() {
         super.onResume()
         // Start SemanticDetector
+        gpsManager.startLocationUpdates()
         semanticDetector.startDetection()
+
     }
 
     override fun onPause() {
         super.onPause()
         // Stop SemanticDetector
         semanticDetector.stopDetection()
+        gpsManager.stopLocationUpdates()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         semanticDetector.stopDetection()
+        gpsManager.stopLocationUpdates()
     }
 
 }
