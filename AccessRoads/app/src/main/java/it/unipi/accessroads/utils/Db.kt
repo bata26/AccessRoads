@@ -12,7 +12,7 @@ import kotlin.math.*
 
 class Db {
     companion object {
-        private const val DIST_BETWEEN_2_POINTS_MAX:Double=0.15
+        private const val DIST_BETWEEN_2_POINTS_MAX:Double=0.02
 
         fun getPoints(callback: (List<AccessibilityPoint>) -> Unit ) {
             Log.d(TAG , "PRE READ")
